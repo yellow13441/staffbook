@@ -1,0 +1,52 @@
+// See README.txt for information and build instructions.
+//
+// Note: START and END tags are used in comments to define sections used in
+// tutorials.  They are not part of the syntax for Protocol Buffers.
+//
+// To get an in-depth walkthrough of this file and the related examples, see:
+// https://developers.google.com/protocol-buffers/docs/tutorials
+
+// [START declaration]
+syntax = "proto3";
+package staffbook;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+// [END declaration]
+
+// [START messages]
+message Employee {
+  int32 id = 1; // Unique ID number for this employee.
+  string name = 2;
+  int32 age = 3;
+
+  enum GenderType {
+    OTHERS = 0;
+    MALE = 1;
+    FEMALE = 2;
+  }
+  GenderType gender = 4;
+  
+  string email = 5;
+  string phone = 6;
+
+  google.protobuf.Timestamp last_updated = 7;
+}
+
+// Our staff book file is just one of these.
+message StaffBook {
+  repeated Employee employees = 1;
+}
+// [END messages]
+
+service CURD {
+  // Sends a query request by id
+  rpc AddEmployee (Employee) returns (google.protobuf.Empty) {}
+  rpc ListEmployees (google.protobuf.Empty) returns (StaffBook) {}
+  rpc QueryEmployeeByID (IDRequest) returns (Employee) {}
+}
+
+// The request message containing the user's name.
+message IDRequest {
+  string id = 1;
+}
