@@ -68,13 +68,18 @@ class CURDImpl final : public CURD::Service {
   }
 
   Status ListEmployees(ServerContext* context, staffbook::StaffBook* staff_book_reply) {
-    staff_book_reply = &staff_book;
-    // google::protobuf::Empty* empty;
-    // for (int i = 0; i < staff_book.employees_size(); i++) {
-    //   const staffbook::Employee& employee = staff_book.employees(i);
-    //   staff_book_reply->add_employees(context, &employee, empty);
-    // // ::grpc::Status AddEmployee(::grpc::ServerContext* /*context*/, const ::staffbook::Employee* /*request*/, ::google::protobuf::Empty* /*response*/) override {
-    // }
+    google::protobuf::Empty* empty;
+    for (int i = 0; i < staff_book.employees_size(); i++) {
+      const staffbook::Employee& employee = staff_book.employees(i);
+      staff_book_reply->employees(i).set_id(employee.id()); 
+      staff_book_reply->employees(i).set_name(employee.name()); 
+      staff_book_reply->employees(i).set_age(employee.age()); 
+      staff_book_reply->employees(i).set_gender(employee.gender()); 
+      staff_book_reply->employees(i).set_email(employee.email()); 
+      staff_book_reply->employees(i).set_phone(employee.phone()); 
+      *(staff_book_reply->employees(i))->mutable_last_updated() = TimeUtil::ToString(employee.last_updated()); 
+    // ::grpc::Status AddEmployee(::grpc::ServerContext* /*context*/, const ::staffbook::Employee* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+    }
     return Status::OK;
   }
 
