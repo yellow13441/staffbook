@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <google/protobuf/util/time_util.h>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -31,14 +33,14 @@
 #ifdef BAZEL_BUILD
 #include "examples/protos/staffbook.grpc.pb.h"
 #else
-#include "staffbook.pb.h"
+#include "staffbook.grpc.pb.h"
 #endif
 
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::ServerReader;
-using grpc::ServerReaderWriter;
+// using grpc::ServerReaderWriter;
 using grpc::ServerWriter;
 using grpc::Status;
 // using routeguide::Feature;
@@ -47,52 +49,53 @@ using grpc::Status;
 // using routeguide::RouteGuide;
 // using routeguide::RouteNote;
 // using routeguide::RouteSummary;
+using staffbook::CURD;
 using std::chrono::system_clock;
 using google::protobuf::util::TimeUtil;
 
 
-class staffbookImpl final : public staffbook::Service {
+class CURDImpl final : public CURD::Service {
  public:
-  explicit staffbookImpl(const std::string& db, staffbook::StaffBook& staff_book) {
+  explicit CURDImpl(const std::string& db, staffbook::StaffBook& staff_book) {
     // Read the existing staff book.
-    std::fstream input(db, ios::in | ios::binary);
+    std::fstream input(db, std::ios::in | std::ios::binary);
     if (!staff_book.ParseFromIstream(&input)) {
-      cerr << "Error parsing the staffbook db" << std::endl;
-      return -1;
+      std::cerr << "Error parsing the staffbook db" << std::endl;
+      // return -1;
     }
   }
 
-  Status ListEmployees(ServerContext* context, staffbook::StaffBook* staff_book) override {
+  Status ListEmployees(ServerContext* context, staffbook::StaffBook* staff_book) {
     for (int i = 0; i < staff_book.employees_size(); i++) {
       const staffbook::Employee& employee = staff_book.employees(i);
 
-      cout << "Employee ID: " << employee.id() << std::endl;
-      cout << "  Name: " << employee.name() << std::endl;
-      cout << "  Age: " << employee.age() << std::endl;
+      std::cout << "Employee ID: " << employee.id() << std::endl;
+      std::cout << "  Name: " << employee.name() << std::endl;
+      std::cout << "  Age: " << employee.age() << std::endl;
 
-      cout << "  Gender: ";
+      std::cout << "  Gender: ";
       switch (employee.gender()) {
         case staffbook::Employee::MALE:
-          cout << "MALE" << std::endl;
+          std::cout << "MALE" << std::endl;
           break;
         case staffbook::Employee::FEMALE:
-          cout << "FEMALE" << std::endl;
+          std::cout << "FEMALE" << std::endl;
           break;
         default:
-          cout << "OTHERS" << std::endl;
+          std::cout << "OTHERS" << std::endl;
           break;
       }
 
       if (employee.email() != "") {
-        cout << "  E-mail address: " << employee.email() << std::endl;
+        std::cout << "  E-mail address: " << employee.email() << std::endl;
       }
 
       if (employee.phone() != "") {
-        cout << "  Phone number: " << employee.phone() << std::endl;
+        std::cout << "  Phone number: " << employee.phone() << std::endl;
       }
 
       if (employee.has_last_updated()) {
-        cout << "  Updated: " << TimeUtil::ToString(employee.last_updated()) << std::endl;
+        std::cout << "  Updated: " << TimeUtil::ToString(employee.last_updated()) << std::endl;
       }
     }
     return Status::OK;
@@ -105,13 +108,13 @@ class staffbookImpl final : public staffbook::Service {
 
 void RunServer(const std::string& db_path) {
   std::string server_address("0.0.0.0:50051");
-  staffbookImpl service(db_path);
+  CURDImpl service(db_path);
 
   ServerBuilder builder;
   builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
   builder.RegisterService(&service);
   std::unique_ptr<Server> server(builder.BuildAndStart());
-  std::cout << "Server listening on " << server_address << std::std::endl;
+  std::cout << "Server listening on " << server_address << std::endl;
   server->Wait();
 }
 

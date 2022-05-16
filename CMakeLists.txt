@@ -23,8 +23,6 @@ project(StaffBook C CXX)
 
 include(common.cmake)
 
-
-
 # Proto file
 get_filename_component(sb_proto "staffbook.proto" ABSOLUTE)
 get_filename_component(sb_proto_path "${sb_proto}" PATH)
@@ -58,7 +56,7 @@ target_link_libraries(sb_grpc_proto
   ${_GRPC_GRPCPP}
   ${_PROTOBUF_LIBPROTOBUF})
 
-# Targets greeter_[async_](client|server)
+# Targets staffbook_(client|server)
 foreach(_target
   add_employee list_employees query_employee staffbook_server)
   add_executable(${_target} "${_target}.cc")
