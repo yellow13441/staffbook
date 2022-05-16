@@ -23,6 +23,8 @@ project(StaffBook C CXX)
 
 include(common.cmake)
 
+
+
 # Proto file
 get_filename_component(sb_proto "staffbook.proto" ABSOLUTE)
 get_filename_component(sb_proto_path "${sb_proto}" PATH)
