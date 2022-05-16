@@ -56,7 +56,7 @@ using google::protobuf::util::TimeUtil;
 
 class CURDImpl final : public CURD::Service {
  public:
-  explicit CURDImpl(const std::string& db, staffbook::StaffBook& staff_book) {
+  explicit CURDImpl(const std::string& db) {
     // Read the existing staff book.
     std::fstream input(db, std::ios::in | std::ios::binary);
     if (!staff_book.ParseFromIstream(&input)) {
@@ -66,8 +66,8 @@ class CURDImpl final : public CURD::Service {
   }
 
   Status ListEmployees(ServerContext* context, staffbook::StaffBook* staff_book) {
-    for (int i = 0; i < staff_book.employees_size(); i++) {
-      const staffbook::Employee& employee = staff_book.employees(i);
+    for (int i = 0; i < staff_book->employees_size(); i++) {
+      const staffbook::Employee& employee = staff_book->employees(i);
 
       std::cout << "Employee ID: " << employee.id() << std::endl;
       std::cout << "  Name: " << employee.name() << std::endl;
@@ -102,7 +102,7 @@ class CURDImpl final : public CURD::Service {
   }
 
  private:
-  staffbook::StaffBook& staff_book;
+  staffbook::StaffBook staff_book;
   std::mutex mu_;
 };
 
