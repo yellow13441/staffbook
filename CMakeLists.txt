@@ -21,7 +21,7 @@ cmake_minimum_required(VERSION 3.5.1)
 
 project(StaffBook C CXX)
 
-include(../cmake/common.cmake)
+include(common.cmake)
 
 # Proto file
 get_filename_component(sb_proto "staffbook.proto" ABSOLUTE)
