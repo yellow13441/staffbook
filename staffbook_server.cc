@@ -128,6 +128,5 @@ int main(int argc, char** argv) {
   std::string db(argv[0]);
   RunServer(db);
 
-
   return 0;
 }
