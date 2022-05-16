@@ -58,7 +58,8 @@ target_link_libraries(sb_grpc_proto
 
 # Targets staffbook_(client|server)
 foreach(_target
-  add_employee list_employees query_employee staffbook_server)
+  add_employee list_employees query_employee
+  staffbook_server staffbook_client)
   add_executable(${_target} "${_target}.cc")
   target_link_libraries(${_target}
     sb_grpc_proto

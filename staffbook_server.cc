@@ -58,6 +58,8 @@ class CURDImpl final : public CURD::Service {
  public:
   explicit CURDImpl(const std::string& db) {
     // Read the existing staff book.
+    std::cout << db << std::endl;
+
     std::fstream input(db, std::ios::in | std::ios::binary);
     if (!staff_book.ParseFromIstream(&input)) {
       std::cerr << "Error parsing the staffbook db" << std::endl;
@@ -128,7 +130,7 @@ int main(int argc, char** argv) {
     std::cerr << "Usage:  " << argv[0] << " STAFF_BOOK_FILE" << std::endl;
     return -1;
   }
-  std::string db(argv[0]);
+  std::string db(argv[1]);
   RunServer(db);
 
   return 0;
