@@ -23,8 +23,6 @@
 #include <memory>
 #include <string>
 
-#include "helper.h"
-
 #include <grpc/grpc.h>
 #include <grpcpp/security/server_credentials.h>
 #include <grpcpp/server.h>
@@ -53,101 +51,81 @@ using std::chrono::system_clock;
 using google::protobuf::util::TimeUtil;
 
 
-class CURDImpl final : public CURD::Service {
+class staffbookImpl final : public staffbook::Service {
  public:
-  Status ListEmployees(ServerContext* context, StaffBook* staffbook) override {
-    feature->set_name(GetFeatureName(*point, feature_list_));
-    feature->mutable_location()->CopyFrom(*point);
-    return Status::OK;
+  explicit staffbookImpl(const std::string& db, staffbook::StaffBook& staff_book) {
+    // Read the existing staff book.
+    std::fstream input(db, ios::in | ios::binary);
+    if (!staff_book.ParseFromIstream(&input)) {
+      cerr << "Error parsing the staffbook db" << std::endl;
+      return -1;
+    }
   }
 
-  Status ListFeatures(ServerContext* context,
-                      const routeguide::Rectangle* rectangle,
-                      ServerWriter<Feature>* writer) override {
-    auto lo = rectangle->lo();
-    auto hi = rectangle->hi();
-    long left = (std::min)(lo.longitude(), hi.longitude());
-    long right = (std::max)(lo.longitude(), hi.longitude());
-    long top = (std::max)(lo.latitude(), hi.latitude());
-    long bottom = (std::min)(lo.latitude(), hi.latitude());
-    for (const Feature& f : feature_list_) {
-      if (f.location().longitude() >= left &&
-          f.location().longitude() <= right &&
-          f.location().latitude() >= bottom && f.location().latitude() <= top) {
-        writer->Write(f);
+  Status ListEmployees(ServerContext* context, staffbook::StaffBook* staff_book) override {
+    for (int i = 0; i < staff_book.employees_size(); i++) {
+      const staffbook::Employee& employee = staff_book.employees(i);
+
+      cout << "Employee ID: " << employee.id() << std::endl;
+      cout << "  Name: " << employee.name() << std::endl;
+      cout << "  Age: " << employee.age() << std::endl;
+
+      cout << "  Gender: ";
+      switch (employee.gender()) {
+        case staffbook::Employee::MALE:
+          cout << "MALE" << std::endl;
+          break;
+        case staffbook::Employee::FEMALE:
+          cout << "FEMALE" << std::endl;
+          break;
+        default:
+          cout << "OTHERS" << std::endl;
+          break;
+      }
+
+      if (employee.email() != "") {
+        cout << "  E-mail address: " << employee.email() << std::endl;
+      }
+
+      if (employee.phone() != "") {
+        cout << "  Phone number: " << employee.phone() << std::endl;
+      }
+
+      if (employee.has_last_updated()) {
+        cout << "  Updated: " << TimeUtil::ToString(employee.last_updated()) << std::endl;
       }
     }
-    return Status::OK;
-  }
-
-  Status RecordRoute(ServerContext* context, ServerReader<Point>* reader,
-                     RouteSummary* summary) override {
-    Point point;
-    int point_count = 0;
-    int feature_count = 0;
-    float distance = 0.0;
-    Point previous;
-
-    system_clock::time_point start_time = system_clock::now();
-    while (reader->Read(&point)) {
-      point_count++;
-      if (!GetFeatureName(point, feature_list_).empty()) {
-        feature_count++;
-      }
-      if (point_count != 1) {
-        distance += GetDistance(previous, point);
-      }
-      previous = point;
-    }
-    system_clock::time_point end_time = system_clock::now();
-    summary->set_point_count(point_count);
-    summary->set_feature_count(feature_count);
-    summary->set_distance(static_cast<long>(distance));
-    auto secs =
-        std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
-    summary->set_elapsed_time(secs.count());
-
-    return Status::OK;
-  }
-
-  Status RouteChat(ServerContext* context,
-                   ServerReaderWriter<RouteNote, RouteNote>* stream) override {
-    RouteNote note;
-    while (stream->Read(&note)) {
-      std::unique_lock<std::mutex> lock(mu_);
-      for (const RouteNote& n : received_notes_) {
-        if (n.location().latitude() == note.location().latitude() &&
-            n.location().longitude() == note.location().longitude()) {
-          stream->Write(n);
-        }
-      }
-      received_notes_.push_back(note);
-    }
-
     return Status::OK;
   }
 
  private:
-  std::vector<Feature> feature_list_;
+  staffbook::StaffBook& staff_book;
   std::mutex mu_;
-  std::vector<RouteNote> received_notes_;
 };
 
 void RunServer(const std::string& db_path) {
   std::string server_address("0.0.0.0:50051");
-  RouteGuideImpl service(db_path);
+  staffbookImpl service(db_path);
 
   ServerBuilder builder;
   builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
   builder.RegisterService(&service);
   std::unique_ptr<Server> server(builder.BuildAndStart());
-  std::cout << "Server listening on " << server_address << std::endl;
+  std::cout << "Server listening on " << server_address << std::std::endl;
   server->Wait();
 }
 
 int main(int argc, char** argv) {
-  // Expect only arg: --db_path=path/to/route_guide_db.json.
-  std::string db = routeguide::GetDbFileContent(argc, argv);
+  // Verify that the version of the library that we linked against is
+  // compatible with the version of the headers we compiled against.
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  if (argc != 2) {
+    // Expect only arg: --db_path=path/to/staffbook.data
+    std::cerr << "Usage:  " << argv[0] << " STAFF_BOOK_FILE" << std::endl;
+    return -1;
+  }
+  std::string db(argv[0]);
   RunServer(db);
 
   return 0;
