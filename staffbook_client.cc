@@ -75,78 +75,42 @@ class CURDClient {
     Employee employee;
     ClientContext context;
 
-    
-
-    // std::unique_ptr<ClientReader<Employee> > reader(
-    //     stub_->ListEmployees(&context, empty, &staff_book));
-    // while (reader->Read(&employee)) {
-    //   std::cout << "Employee ID: " << employee.id() << std::endl;
-    //   std::cout << "  Name: " << employee.name() << std::endl;
-    //   std::cout << "  Age: " << employee.age() << std::endl;
-
-    //   std::cout << "  Gender: ";
-    //   switch (employee.gender()) {
-    //     case staffbook::Employee::MALE:
-    //       std::cout << "MALE" << std::endl;
-    //       break;
-    //     case staffbook::Employee::FEMALE:
-    //       std::cout << "FEMALE" << std::endl;
-    //       break;
-    //     default:
-    //       std::cout << "OTHERS" << std::endl;
-    //       break;
-    //   }
-
-    //   if (employee.email() != "") {
-    //     std::cout << "  E-mail address: " << employee.email() << std::endl;
-    //   }
-
-    //   if (employee.phone() != "") {
-    //     std::cout << "  Phone number: " << employee.phone() << std::endl;
-    //   }
-
-    //   if (employee.has_last_updated()) {
-    //     std::cout << "  Updated: " << TimeUtil::ToString(employee.last_updated()) << std::endl;
-    //   }
-    // }
-
     std::cout << "Looking for all employees" << std::endl;
-    Status status = stub_->ListEmployees(&context, empty, &staff_book);
-
-    for (int i = 0; i < staff_book.employees_size(); i++) {
-    const staffbook::Employee& employee = staff_book.employees(i);
-    std::cout << "Employee ID: " << employee.id() << std::endl;
-      std::cout << "  Name: " << employee.name() << std::endl;
-      std::cout << "  Age: " << employee.age() << std::endl;
-
-      std::cout << "  Gender: ";
-      switch (employee.gender()) {
-        case staffbook::Employee::MALE:
-          std::cout << "MALE" << std::endl;
-          break;
-        case staffbook::Employee::FEMALE:
-          std::cout << "FEMALE" << std::endl;
-          break;
-        default:
-          std::cout << "OTHERS" << std::endl;
-          break;
-      }
-
-      if (employee.email() != "") {
-        std::cout << "  E-mail address: " << employee.email() << std::endl;
-      }
-
-      if (employee.phone() != "") {
-        std::cout << "  Phone number: " << employee.phone() << std::endl;
-      }
-
-      if (employee.has_last_updated()) {
-        std::cout << "  Updated: " << TimeUtil::ToString(employee.last_updated()) << std::endl;
-      }
-    }
+    Status status = stub_->ListEmployees(&context, empty, &staff_book);;
 
     if (status.ok()) {
       std::cout << "ListEmployees rpc succeeded." << std::endl;
+      for (int i = 0; i < staff_book.employees_size(); i++) {
+        const staffbook::Employee& employee = staff_book.employees(i);
+        std::cout << "Employee ID: " << employee.id() << std::endl;
+        std::cout << "  Name: " << employee.name() << std::endl;
+        std::cout << "  Age: " << employee.age() << std::endl;
+
+        std::cout << "  Gender: ";
+        switch (employee.gender()) {
+          case staffbook::Employee::MALE:
+            std::cout << "MALE" << std::endl;
+            break;
+          case staffbook::Employee::FEMALE:
+            std::cout << "FEMALE" << std::endl;
+            break;
+          default:
+            std::cout << "OTHERS" << std::endl;
+            break;
+        }
+
+        if (employee.email() != "") {
+          std::cout << "  E-mail address: " << employee.email() << std::endl;
+        }
+
+        if (employee.phone() != "") {
+          std::cout << "  Phone number: " << employee.phone() << std::endl;
+        }
+
+        if (employee.has_last_updated()) {
+          std::cout << "  Updated: " << TimeUtil::ToString(employee.last_updated()) << std::endl;
+        }
+      }
     } else {
       std::cout << "ListEmployees rpc failed." << std::endl;
     }
@@ -161,13 +125,6 @@ int main(int argc, char** argv) {
   // Verify that the version of the library that we linked against is
   // compatible with the version of the headers we compiled against.
   GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  // if (argc != 2) {
-  //   // Expect only arg: --db_path=path/to/staffbook.data
-  //   std::cerr << "Usage:  " << argv[0] << " STAFF_BOOK_FILE" << std::endl;
-  //   return -1;
-  // }
-  // std::string db(argv[1]);
 
   CURDClient book(
       grpc::CreateChannel("localhost:50051",

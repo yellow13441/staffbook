@@ -67,39 +67,14 @@ class CURDImpl final : public CURD::Service {
     }
   }
 
-  Status ListEmployees(ServerContext* context, staffbook::StaffBook* staff_book) {
-    for (int i = 0; i < staff_book->employees_size(); i++) {
-      const staffbook::Employee& employee = staff_book->employees(i);
-
-      std::cout << "Employee ID: " << employee.id() << std::endl;
-      std::cout << "  Name: " << employee.name() << std::endl;
-      std::cout << "  Age: " << employee.age() << std::endl;
-
-      std::cout << "  Gender: ";
-      switch (employee.gender()) {
-        case staffbook::Employee::MALE:
-          std::cout << "MALE" << std::endl;
-          break;
-        case staffbook::Employee::FEMALE:
-          std::cout << "FEMALE" << std::endl;
-          break;
-        default:
-          std::cout << "OTHERS" << std::endl;
-          break;
-      }
-
-      if (employee.email() != "") {
-        std::cout << "  E-mail address: " << employee.email() << std::endl;
-      }
-
-      if (employee.phone() != "") {
-        std::cout << "  Phone number: " << employee.phone() << std::endl;
-      }
-
-      if (employee.has_last_updated()) {
-        std::cout << "  Updated: " << TimeUtil::ToString(employee.last_updated()) << std::endl;
-      }
-    }
+  Status ListEmployees(ServerContext* context, staffbook::StaffBook* staff_book_reply) {
+    staff_book_reply = &staff_book;
+    // google::protobuf::Empty* empty;
+    // for (int i = 0; i < staff_book.employees_size(); i++) {
+    //   const staffbook::Employee& employee = staff_book.employees(i);
+    //   staff_book_reply->add_employees(context, &employee, empty);
+    // // ::grpc::Status AddEmployee(::grpc::ServerContext* /*context*/, const ::staffbook::Employee* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+    // }
     return Status::OK;
   }
 
