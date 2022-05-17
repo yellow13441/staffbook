@@ -183,6 +183,53 @@ class CURDClient {
     }
   }
 
+  void QueryEmployeeByID() {
+    staffbook::IDRequest id_request;
+    Employee employee;
+    ClientContext context;
+
+    int id;
+    cout << "Looking for a specified employee with ID: ";
+    cin >> id;
+    id_request.set_id(id);
+
+    Status status = stub_->QueryEmployeeByID(&context, id_request, &employee);;
+    if (status.ok()) {
+      cout << "QueryEmployeeByID rpc succeeded." << endl;
+      cout << "Employee ID: " << employee.id() << endl;
+      cout << "  Name: " << employee.name() << endl;
+      cout << "  Age: " << employee.age() << endl;
+
+      cout << "  Gender: ";
+      switch (employee.gender()) {
+        case staffbook::Employee::MALE:
+          cout << "MALE" << endl;
+          break;
+        case staffbook::Employee::FEMALE:
+          cout << "FEMALE" << endl;
+          break;
+        default:
+          cout << "OTHERS" << endl;
+          break;
+      }
+
+      if (employee.email() != "") {
+        cout << "  E-mail address: " << employee.email() << endl;
+      }
+
+      if (employee.phone() != "") {
+        cout << "  Phone number: " << employee.phone() << endl;
+      }
+
+      if (employee.has_last_updated()) {
+        cout << "  Updated: " << TimeUtil::ToString(employee.last_updated()) << endl;
+      }
+    } else {
+      cout << "QueryEmployeeByID rpc failed." << endl;
+      cout << status.error_code() << ": " << status.error_message() << endl;
+    }
+  }
+
  private:
   unique_ptr<CURD::Stub> stub_;
   // staffbook::StaffBook staff_book;
@@ -209,6 +256,7 @@ int main(int argc, char** argv) {
         break;
       case 2: 
         cout << "-----------  QueryEmployeeByID  -----------" << endl;
+        book.QueryEmployeeByID();
         break;
       case 3: 
         cout << "-------------- ListEmployees --------------" << endl;

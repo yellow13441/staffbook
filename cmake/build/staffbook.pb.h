@@ -649,18 +649,13 @@ class IDRequest final :
   enum : int {
     kIdFieldNumber = 1,
   };
-  // string id = 1;
+  // int32 id = 1;
   void clear_id();
-  const std::string& id() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_id(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_id();
-  PROTOBUF_NODISCARD std::string* release_id();
-  void set_allocated_id(std::string* id);
+  int32_t id() const;
+  void set_id(int32_t value);
   private:
-  const std::string& _internal_id() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_id(const std::string& value);
-  std::string* _internal_mutable_id();
+  int32_t _internal_id() const;
+  void _internal_set_id(int32_t value);
   public:
 
   // @@protoc_insertion_point(class_scope:staffbook.IDRequest)
@@ -670,7 +665,7 @@ class IDRequest final :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr id_;
+  int32_t id_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_staffbook_2eproto;
 };
@@ -1032,55 +1027,24 @@ StaffBook::employees() const {
 
 // IDRequest
 
-// string id = 1;
+// int32 id = 1;
 inline void IDRequest::clear_id() {
-  id_.ClearToEmpty();
+  id_ = 0;
 }
-inline const std::string& IDRequest::id() const {
+inline int32_t IDRequest::_internal_id() const {
+  return id_;
+}
+inline int32_t IDRequest::id() const {
   // @@protoc_insertion_point(field_get:staffbook.IDRequest.id)
   return _internal_id();
 }
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void IDRequest::set_id(ArgT0&& arg0, ArgT... args) {
- 
- id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+inline void IDRequest::_internal_set_id(int32_t value) {
+  
+  id_ = value;
+}
+inline void IDRequest::set_id(int32_t value) {
+  _internal_set_id(value);
   // @@protoc_insertion_point(field_set:staffbook.IDRequest.id)
-}
-inline std::string* IDRequest::mutable_id() {
-  std::string* _s = _internal_mutable_id();
-  // @@protoc_insertion_point(field_mutable:staffbook.IDRequest.id)
-  return _s;
-}
-inline const std::string& IDRequest::_internal_id() const {
-  return id_.Get();
-}
-inline void IDRequest::_internal_set_id(const std::string& value) {
-  
-  id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
-}
-inline std::string* IDRequest::_internal_mutable_id() {
-  
-  return id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
-}
-inline std::string* IDRequest::release_id() {
-  // @@protoc_insertion_point(field_release:staffbook.IDRequest.id)
-  return id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
-}
-inline void IDRequest::set_allocated_id(std::string* id) {
-  if (id != nullptr) {
-    
-  } else {
-    
-  }
-  id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), id,
-      GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (id_.IsDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited())) {
-    id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:staffbook.IDRequest.id)
 }
 
 #ifdef __GNUC__

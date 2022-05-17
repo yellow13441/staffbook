@@ -107,6 +107,31 @@ class CURDImpl final : public CURD::Service {
     return Status::OK;
   }
 
+  Status QueryEmployeeByID(ServerContext* context, const staffbook::IDRequest id_request, staffbook::Employee* employee_reply) {
+    cout << "Received a QueryEmployeeByID RPC at " << TimeUtil::ToString(TimeUtil::SecondsToTimestamp(time(NULL))) << endl;
+
+    int id = id_request.id();
+    for (int i = 0; i < staff_book.employees_size(); i++) {
+      const staffbook::Employee& employee = staff_book.employees(i);
+      if (employee.id() == id) {
+        employee_reply->set_id(employee.id()); 
+        employee_reply->set_name(employee.name()); 
+        employee_reply->set_age(employee.age()); 
+        employee_reply->set_gender(employee.gender()); 
+        employee_reply->set_email(employee.email()); 
+        employee_reply->set_phone(employee.phone()); 
+        *employee_reply->mutable_last_updated() = employee.last_updated(); 
+        // return Status::OK;
+      }
+      break;
+    }
+    // todo
+    // Error Handling: What if employee specified ID not found?
+    // https://cloud.google.com/apis/design/errors#error_model
+    // return Status::error(2, "Invalid ID, check your input.");
+    return Status::OK;
+  }
+
  private:
   staffbook::StaffBook staff_book;
   mutex mu_;
