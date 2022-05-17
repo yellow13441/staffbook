@@ -68,7 +68,7 @@ class CURDImpl final : public CURD::Service {
   }
 
   Status AddEmployee(ServerContext* context, const staffbook::Employee* employee_request, google::protobuf::Empty* empty) {
-    cout << "Received a AddEmployee RPC at" << TimeUtil::ToString(TimeUtil::SecondsToTimestamp(time(NULL))) << endl;
+    cout << "Received a AddEmployee RPC at " << TimeUtil::ToString(TimeUtil::SecondsToTimestamp(time(NULL))) << endl;
     
     // Add an staff.
     staffbook::Employee* employee_add = staff_book.add_employees();
@@ -90,7 +90,7 @@ class CURDImpl final : public CURD::Service {
   }
 
   Status ListEmployees(ServerContext* context, const google::protobuf::Empty* empty, staffbook::StaffBook* staff_book_reply) {
-    cout << "Received a ListEmployees RPC at" << TimeUtil::ToString(TimeUtil::SecondsToTimestamp(time(NULL))) << endl;
+    cout << "Received a ListEmployees RPC at " << TimeUtil::ToString(TimeUtil::SecondsToTimestamp(time(NULL))) << endl;
 
     for (int i = 0; i < staff_book.employees_size(); i++) {
       const staffbook::Employee& employee = staff_book.employees(i);

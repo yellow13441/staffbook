@@ -18,6 +18,7 @@
 
 #include <chrono>
 #include <fstream>
+#include <cstdlib>
 #include <iostream>
 #include <google/protobuf/util/time_util.h>
 #include <memory>
@@ -47,6 +48,22 @@ using staffbook::StaffBook;
 using staffbook::CURD;
 using google::protobuf::util::TimeUtil;
 using namespace std;
+
+int GetInput() {
+  int choice;    
+  cin >> choice;
+  return choice;
+}
+
+void DisplayMainMenu() {
+  cout << "-------      Menu     -------\n";
+  cout << "Please make your selection\n";
+  cout << "1 - Add an employee\n";
+  cout << "2 - Query an employee by ID\n";
+  cout << "3 - List all employees\n";
+  cout << "0 - Quit\n";
+  cout << "Selection: ";
+}
 
 // This function fills in a Employee message based on user input.
 void PromptForStaff(staffbook::Employee* employee) {
@@ -97,14 +114,6 @@ class CURDClient {
  public:
   CURDClient(shared_ptr<Channel> channel)
       : stub_(CURD::NewStub(channel)) {
-    // // Read the existing staff book.
-    // cout << db << endl;
-
-    // fstream input(db, ios::in | ios::binary);
-    // if (!staff_book.ParseFromIstream(&input)) {
-    //   cerr << "Error parsing the staffbook db" << endl;
-    //   // return -1;
-    // }
   }
 
   void AddEmployee() {
@@ -188,11 +197,27 @@ int main(int argc, char** argv) {
       grpc::CreateChannel("localhost:50051",
                           grpc::InsecureChannelCredentials()));
 
-  cout << "-------------- ListEmployees --------------" << endl;
-  book.ListEmployees();
-  cout << "--------------  AddEmployee  --------------" << endl;
-  book.AddEmployee();
-
+  int choice = 1;
+  do {
+    DisplayMainMenu();
+    choice = GetInput();
+    system("clear");
+    switch(choice) {
+      case 1:
+        cout << "--------------  AddEmployee  --------------" << endl;
+        book.AddEmployee();
+        break;
+      case 2: 
+        cout << "-----------  QueryEmployeeByID  -----------" << endl;
+        break;
+      case 3: 
+        cout << "-------------- ListEmployees --------------" << endl;
+        book.ListEmployees();
+        break;
+      default: 
+        break;
+      }
+  } while(choice);
   
   return 0;
 }
