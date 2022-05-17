@@ -107,12 +107,13 @@ class CURDImpl final : public CURD::Service {
     return Status::OK;
   }
 
-  Status QueryEmployeeByID(ServerContext* context, const staffbook::IDRequest id_request, staffbook::Employee* employee_reply) {
+  Status QueryEmployeeByID(ServerContext* context, const staffbook::IDRequest* id_request, staffbook::Employee* employee_reply) {
     cout << "Received a QueryEmployeeByID RPC at " << TimeUtil::ToString(TimeUtil::SecondsToTimestamp(time(NULL))) << endl;
 
-    int id = id_request.id();
+    int id = id_request->id();
     for (int i = 0; i < staff_book.employees_size(); i++) {
       const staffbook::Employee& employee = staff_book.employees(i);
+      // cout << i << ": " << employee.id() << endl;
       if (employee.id() == id) {
         employee_reply->set_id(employee.id()); 
         employee_reply->set_name(employee.name()); 
@@ -121,9 +122,10 @@ class CURDImpl final : public CURD::Service {
         employee_reply->set_email(employee.email()); 
         employee_reply->set_phone(employee.phone()); 
         *employee_reply->mutable_last_updated() = employee.last_updated(); 
+        // cout << "found" << endl;
         // return Status::OK;
+        break;
       }
-      break;
     }
     // todo
     // Error Handling: What if employee specified ID not found?
