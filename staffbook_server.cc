@@ -59,10 +59,12 @@ class CURDImpl final : public CURD::Service {
  public:
   explicit CURDImpl(const string& db) {
     // Read the existing staff book.
-    cout << db << endl;
+    cout << "Using " << db << " as database"<< endl;
     DBPATH = db;
     fstream input(db, ios::in | ios::binary);
-    if (!staff_book.ParseFromIstream(&input)) {
+    if (!input) {
+      cout << db << ": File not found.  Creating a new file." << endl;
+    } else if (!staff_book.ParseFromIstream(&input)) {
       cerr << "Error parsing the staffbook db" << endl;
     }
   }
