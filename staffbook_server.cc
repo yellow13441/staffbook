@@ -52,51 +52,76 @@ using grpc::Status;
 using staffbook::CURD;
 using std::chrono::system_clock;
 using google::protobuf::util::TimeUtil;
+using namespace std;
 
 
 class CURDImpl final : public CURD::Service {
  public:
-  explicit CURDImpl(const std::string& db) {
+  explicit CURDImpl(const string& db) {
     // Read the existing staff book.
-    std::cout << db << std::endl;
-
-    std::fstream input(db, std::ios::in | std::ios::binary);
+    cout << db << endl;
+    DBPATH = db;
+    fstream input(db, ios::in | ios::binary);
     if (!staff_book.ParseFromIstream(&input)) {
-      std::cerr << "Error parsing the staffbook db" << std::endl;
-      // return -1;
+      cerr << "Error parsing the staffbook db" << endl;
     }
   }
 
-  Status ListEmployees(ServerContext* context, staffbook::StaffBook* staff_book_reply) {
-    google::protobuf::Empty* empty;
+  Status AddEmployee(ServerContext* context, const staffbook::Employee* employee_request, google::protobuf::Empty* empty) {
+    cout << "Received a AddEmployee RPC at" << TimeUtil::ToString(TimeUtil::SecondsToTimestamp(time(NULL))) << endl;
+    
+    // Add an staff.
+    staffbook::Employee* employee_add = staff_book.add_employees();
+    employee_add->set_id(employee_request->id()); 
+    employee_add->set_name(employee_request->name()); 
+    employee_add->set_age(employee_request->age()); 
+    employee_add->set_gender(employee_request->gender()); 
+    employee_add->set_email(employee_request->email()); 
+    employee_add->set_phone(employee_request->phone()); 
+    *employee_add->mutable_last_updated() = employee_request->last_updated(); 
+
+    // Write the new staff book back to disk.
+    fstream output(DBPATH, ios::out | ios::trunc | ios::binary);
+    if (!staff_book.SerializeToOstream(&output)) {
+      cerr << "Failed to write staff book." << endl;
+    }
+
+    return Status::OK;
+  }
+
+  Status ListEmployees(ServerContext* context, const google::protobuf::Empty* empty, staffbook::StaffBook* staff_book_reply) {
+    cout << "Received a ListEmployees RPC at" << TimeUtil::ToString(TimeUtil::SecondsToTimestamp(time(NULL))) << endl;
+
     for (int i = 0; i < staff_book.employees_size(); i++) {
       const staffbook::Employee& employee = staff_book.employees(i);
-      staff_book_reply->employees(i).set_id(employee.id()); 
-      staff_book_reply->employees(i).set_name(employee.name()); 
-      staff_book_reply->employees(i).set_age(employee.age()); 
-      staff_book_reply->employees(i).set_gender(employee.gender()); 
-      staff_book_reply->employees(i).set_email(employee.email()); 
-      staff_book_reply->employees(i).set_phone(employee.phone()); 
-      *(staff_book_reply->employees(i))->mutable_last_updated() = TimeUtil::ToString(employee.last_updated()); 
-    // ::grpc::Status AddEmployee(::grpc::ServerContext* /*context*/, const ::staffbook::Employee* /*request*/, ::google::protobuf::Empty* /*response*/) override {
+      staffbook::Employee* employee_reply = staff_book_reply->add_employees();
+      employee_reply->set_id(employee.id()); 
+      employee_reply->set_name(employee.name()); 
+      employee_reply->set_age(employee.age()); 
+      employee_reply->set_gender(employee.gender()); 
+      employee_reply->set_email(employee.email()); 
+      employee_reply->set_phone(employee.phone()); 
+      *employee_reply->mutable_last_updated() = employee.last_updated(); 
     }
+
     return Status::OK;
   }
 
  private:
   staffbook::StaffBook staff_book;
-  std::mutex mu_;
+  mutex mu_;
+  string DBPATH;
 };
 
-void RunServer(const std::string& db_path) {
-  std::string server_address("0.0.0.0:50051");
+void RunServer(const string& db_path) {
+  string server_address("0.0.0.0:50051");
   CURDImpl service(db_path);
 
   ServerBuilder builder;
   builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
   builder.RegisterService(&service);
-  std::unique_ptr<Server> server(builder.BuildAndStart());
-  std::cout << "Server listening on " << server_address << std::endl;
+  unique_ptr<Server> server(builder.BuildAndStart());
+  cout << "Server listening on " << server_address << endl;
   server->Wait();
 }
 
@@ -107,10 +132,10 @@ int main(int argc, char** argv) {
 
   if (argc != 2) {
     // Expect only arg: --db_path=path/to/staffbook.data
-    std::cerr << "Usage:  " << argv[0] << " STAFF_BOOK_FILE" << std::endl;
+    cerr << "Usage:  " << argv[0] << " STAFF_BOOK_FILE" << endl;
     return -1;
   }
-  std::string db(argv[1]);
+  string db(argv[1]);
   RunServer(db);
 
   return 0;

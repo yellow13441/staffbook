@@ -46,78 +46,136 @@ using staffbook::Employee;
 using staffbook::StaffBook;
 using staffbook::CURD;
 using google::protobuf::util::TimeUtil;
-// todo
-// Employee MakeEmployee(int id, long longitude) {
-//   Employee e;
-//   e.set_latitude(latitude);
-//   e.set_longitude(longitude);
-//   return p;
-// }
+using namespace std;
 
+// This function fills in a Employee message based on user input.
+void PromptForStaff(staffbook::Employee* employee) {
+  cout << "Enter employee ID number: ";
+  int id;
+  cin >> id;
+  employee->set_id(id);
+  cin.ignore(256, '\n');
+
+  cout << "Enter name: ";
+  getline(cin, *employee->mutable_name());
+
+  cout << "Enter age: ";
+  int age;
+  cin >> age;
+  employee->set_age(age);
+  cin.ignore(256, '\n');
+
+  cout << "Enter gender (M or F): ";
+  string gender;
+  getline(cin, gender);
+  if (gender == "M") {
+    employee->set_gender(staffbook::Employee::MALE);
+  } else if (gender == "F") {
+    employee->set_gender(staffbook::Employee::FEMALE);
+  } else {
+    cout << "Unknown gender type. Using default: Other." << endl;
+  }
+  
+  cout << "Enter email address (blank for none): ";
+  string email;
+  getline(cin, email);
+  if (!email.empty()) {
+    employee->set_email(email);
+  }
+
+  cout << "Enter phone number (blank for none): ";
+  string phone;
+  getline(cin, phone);
+  if (!phone.empty()) {
+    employee->set_phone(phone);
+  }
+
+  *employee->mutable_last_updated() = TimeUtil::SecondsToTimestamp(time(NULL));
+}
 
 class CURDClient {
  public:
-  CURDClient(std::shared_ptr<Channel> channel)
+  CURDClient(shared_ptr<Channel> channel)
       : stub_(CURD::NewStub(channel)) {
     // // Read the existing staff book.
-    // std::cout << db << std::endl;
+    // cout << db << endl;
 
-    // std::fstream input(db, std::ios::in | std::ios::binary);
+    // fstream input(db, ios::in | ios::binary);
     // if (!staff_book.ParseFromIstream(&input)) {
-    //   std::cerr << "Error parsing the staffbook db" << std::endl;
+    //   cerr << "Error parsing the staffbook db" << endl;
     //   // return -1;
     // }
   }
 
-  void ListEmployees() {
+  void AddEmployee() {
     google::protobuf::Empty empty;
+    Employee employee;
+    ClientContext context;
+
+    cout << "Prompting for adding new employee" << endl;
+    PromptForStaff(&employee);
+
+    Status status = stub_->AddEmployee(&context, employee, &empty);;
+
+    if (status.ok()) {
+      cout << "AddEmployee rpc successed." << endl;
+    } else {
+      cout << "AddEmployee rpc failed." << endl;
+      cout << status.error_code() << ": " << status.error_message() << endl;
+    }
+  }
+  
+  void ListEmployees() {
+    const google::protobuf::Empty empty;
     staffbook::StaffBook staff_book;
     Employee employee;
     ClientContext context;
 
-    std::cout << "Looking for all employees" << std::endl;
+    cout << "Looking for all employees" << endl;
     Status status = stub_->ListEmployees(&context, empty, &staff_book);;
 
     if (status.ok()) {
-      std::cout << "ListEmployees rpc succeeded." << std::endl;
+      cout << "ListEmployees rpc succeeded." << endl;
       for (int i = 0; i < staff_book.employees_size(); i++) {
         const staffbook::Employee& employee = staff_book.employees(i);
-        std::cout << "Employee ID: " << employee.id() << std::endl;
-        std::cout << "  Name: " << employee.name() << std::endl;
-        std::cout << "  Age: " << employee.age() << std::endl;
+        // staffbook::Employee& employee = staff_book.employees(i);
+        cout << "Employee ID: " << employee.id() << endl;
+        cout << "  Name: " << employee.name() << endl;
+        cout << "  Age: " << employee.age() << endl;
 
-        std::cout << "  Gender: ";
+        cout << "  Gender: ";
         switch (employee.gender()) {
           case staffbook::Employee::MALE:
-            std::cout << "MALE" << std::endl;
+            cout << "MALE" << endl;
             break;
           case staffbook::Employee::FEMALE:
-            std::cout << "FEMALE" << std::endl;
+            cout << "FEMALE" << endl;
             break;
           default:
-            std::cout << "OTHERS" << std::endl;
+            cout << "OTHERS" << endl;
             break;
         }
 
         if (employee.email() != "") {
-          std::cout << "  E-mail address: " << employee.email() << std::endl;
+          cout << "  E-mail address: " << employee.email() << endl;
         }
 
         if (employee.phone() != "") {
-          std::cout << "  Phone number: " << employee.phone() << std::endl;
+          cout << "  Phone number: " << employee.phone() << endl;
         }
 
         if (employee.has_last_updated()) {
-          std::cout << "  Updated: " << TimeUtil::ToString(employee.last_updated()) << std::endl;
+          cout << "  Updated: " << TimeUtil::ToString(employee.last_updated()) << endl;
         }
       }
     } else {
-      std::cout << "ListEmployees rpc failed." << std::endl;
+      cout << "ListEmployees rpc failed." << endl;
+      cout << status.error_code() << ": " << status.error_message() << endl;
     }
   }
 
  private:
-  std::unique_ptr<CURD::Stub> stub_;
+  unique_ptr<CURD::Stub> stub_;
   // staffbook::StaffBook staff_book;
 };
 
@@ -130,8 +188,11 @@ int main(int argc, char** argv) {
       grpc::CreateChannel("localhost:50051",
                           grpc::InsecureChannelCredentials()));
 
-  std::cout << "-------------- ListEmployees --------------" << std::endl;
+  cout << "-------------- ListEmployees --------------" << endl;
   book.ListEmployees();
+  cout << "--------------  AddEmployee  --------------" << endl;
+  book.AddEmployee();
+
   
   return 0;
 }
